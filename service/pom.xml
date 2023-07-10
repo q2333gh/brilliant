@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <artifactId>service</artifactId>
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>**/*.xml</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
+
+  <dependencies>
+
+    <dependency>
+      <artifactId>service_base</artifactId>
+      <groupId>com.btwl</groupId>
+      <version>001</version>
+    </dependency>
+
+    <dependency>
+      <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+      <groupId>org.springframework.cloud</groupId>
+    </dependency>
+
+    <!--hystrix依赖，主要是用  @HystrixCommand -->
+    <dependency>
+      <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+      <groupId>org.springframework.cloud</groupId>
+    </dependency>
+
+    <!--服务注册-->
+    <dependency>
+      <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+      <groupId>org.springframework.cloud</groupId>
+    </dependency>
+    <!--服务调用-->
+    <dependency>
+      <artifactId>spring-cloud-starter-openfeign</artifactId>
+      <groupId>org.springframework.cloud</groupId>
+    </dependency>
+
+    <dependency>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+
+    <!--mybatis-plus-->
+    <dependency>
+      <artifactId>mybatis-plus-boot-starter</artifactId>
+      <groupId>com.baomidou</groupId>
+    </dependency>
+
+    <!--mysql-->
+    <dependency>
+      <artifactId>mysql-connector-java</artifactId>
+      <groupId>mysql</groupId>
+    </dependency>
+
+    <!-- Mybatis Plus 代码生成器需要 ,velocity 模板引擎 -->
+    <dependency>
+      <artifactId>velocity-engine-core</artifactId>
+      <groupId>org.apache.velocity</groupId>
+    </dependency>
+
+    <!--swagger-->
+    <dependency>
+      <artifactId>springfox-swagger2</artifactId>
+      <groupId>io.springfox</groupId>
+    </dependency>
+    <dependency>
+      <artifactId>springfox-swagger-ui</artifactId>
+      <groupId>io.springfox</groupId>
+    </dependency>
+
+    <!--lombok用来简化实体类：需要安装lombok插件-->
+    <dependency>
+      <artifactId>lombok</artifactId>
+      <groupId>org.projectlombok</groupId>
+    </dependency>
+
+    <!--xls-->
+    <dependency>
+      <artifactId>poi</artifactId>
+      <groupId>org.apache.poi</groupId>
+    </dependency>
+
+    <dependency>
+      <artifactId>poi-ooxml</artifactId>
+      <groupId>org.apache.poi</groupId>
+    </dependency>
+
+    <dependency>
+      <artifactId>commons-fileupload</artifactId>
+      <groupId>commons-fileupload</groupId>
+    </dependency>
+
+    <!--httpclient-->
+    <dependency>
+      <artifactId>httpclient</artifactId>
+      <groupId>org.apache.httpcomponents</groupId>
+    </dependency>
+    <!--commons-io-->
+    <dependency>
+      <artifactId>commons-io</artifactId>
+      <groupId>commons-io</groupId>
+    </dependency>
+    <!--gson-->
+    <dependency>
+      <artifactId>gson</artifactId>
+      <groupId>com.google.code.gson</groupId>
+    </dependency>
+
+    <dependency>
+      <artifactId>junit</artifactId>
+      <groupId>junit</groupId>
+    </dependency>
+  </dependencies>
+  <modelVersion>4.0.0</modelVersion>
+  <modules>
+    <module>service_edu</module>
+    <module>service_vod</module>
+    <module>service_oss</module>
+    <module>service_cms</module>
+    <module>service_acl</module>
+    <module>service_msm</module>
+    <module>service_ucenter</module>
+    <module>service_order</module>
+    <module>service_statistics</module>
+  </modules>
+
+  <packaging>pom</packaging>
+
+  <parent>
+    <artifactId>brilliant_parent</artifactId>
+    <groupId>com.btwl</groupId>
+    <version>001</version>
+  </parent>
+</project>

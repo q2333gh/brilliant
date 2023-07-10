@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <artifactId>common</artifactId>
+  <dependencies>
+    <dependency>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!--mybatis-plus-->
+    <dependency>
+      <artifactId>mybatis-plus-boot-starter</artifactId>
+      <groupId>com.baomidou</groupId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!--lombok用来简化实体类：需要安装lombok插件-->
+    <dependency>
+      <artifactId>lombok</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!--swagger-->
+    <dependency>
+      <artifactId>springfox-swagger2</artifactId>
+      <groupId>io.springfox</groupId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <artifactId>springfox-swagger-ui</artifactId>
+      <groupId>io.springfox</groupId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- redis -->
+    <dependency>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+
+    <!-- spring2.X集成redis所需common-pool2-->
+    <dependency>
+      <artifactId>commons-pool2</artifactId>
+      <groupId>org.apache.commons</groupId>
+      <version>2.6.0</version>
+    </dependency>
+  </dependencies>
+
+  <modelVersion>4.0.0</modelVersion>
+  <modules>
+    <module>service_base</module>
+    <module>common_utils</module>
+    <module>spring_security</module>
+  </modules>
+  <packaging>pom</packaging>
+
+  <parent>
+    <artifactId>brilliant_parent</artifactId>
+    <groupId>com.btwl</groupId>
+    <version>001</version>
+  </parent>
+</project>
