@@ -9,6 +9,11 @@
       <artifactId>jjwt</artifactId>
       <groupId>io.jsonwebtoken</groupId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat.embed</groupId>
+      <artifactId>tomcat-embed-core</artifactId>
+      <version>9.0.43</version>
+    </dependency>
   </dependencies>
 
   <modelVersion>4.0.0</modelVersion>

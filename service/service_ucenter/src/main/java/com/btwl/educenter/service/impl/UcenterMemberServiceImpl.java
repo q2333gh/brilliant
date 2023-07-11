@@ -114,8 +114,7 @@ public class UcenterMemberServiceImpl extends
   public UcenterMember getOpenIdMember(String openid) {
     QueryWrapper<UcenterMember> wrapper = new QueryWrapper<>();
     wrapper.eq("openid", openid);
-    UcenterMember member = baseMapper.selectOne(wrapper);
-    return member;
+    return baseMapper.selectOne(wrapper);
   }
 
   //查询某一天注册人数

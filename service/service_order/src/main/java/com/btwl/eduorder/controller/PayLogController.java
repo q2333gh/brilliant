@@ -27,12 +27,15 @@ public class PayLogController {
   @Autowired
   private PayLogService payLogService;
 
-  //生成微信支付二维码接口
-  //参数是订单号
+  /**
+   *   //生成微信支付二维码接口
+   *   //参数是订单号
+
+   */
   @GetMapping("createNative/{orderNo}")
   public Ret createNative(@PathVariable String orderNo) {
     //返回信息，包含二维码地址，还有其他需要的信息
-    Map map = payLogService.createNatvie(orderNo);
+    Map map = payLogService.createNative(orderNo);
     System.out.println("****返回二维码map集合:" + map);
     return Ret.ok().data(map);
   }

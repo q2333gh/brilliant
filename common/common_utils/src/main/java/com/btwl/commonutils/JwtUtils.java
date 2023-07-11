@@ -8,13 +8,9 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
 
-/**
- * @author helen
- * @since 2019/10/16
- */
+
 public class JwtUtils {
 
-  //常量
   public static final long EXPIRE = 1000 * 60 * 60 * 24; //token过期时间
   public static final String APP_SECRET =
       "ukc8BDbRigUDaY6pZFfWus2jZWLPHO"; //秘钥

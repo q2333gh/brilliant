@@ -1,12 +1,15 @@
 package com.btwl.educenter.controller;
 
 
+import static com.btwl.commonutils.JwtUtils.getMemberIdByJwtToken;
+
 import com.btwl.commonutils.JwtUtils;
 import com.btwl.commonutils.Ret;
 import com.btwl.commonutils.ordervo.UcenterMemberOrder;
 import com.btwl.educenter.entity.UcenterMember;
 import com.btwl.educenter.entity.vo.RegisterVo;
 import com.btwl.educenter.service.UcenterMemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +58,7 @@ public class UcenterMemberController {
   @GetMapping("getMemberInfo")
   public Ret getMemberInfo(HttpServletRequest request) {
     //调用jwt工具类的方法。根据request对象获取头信息，返回用户id
-    String memberId = JwtUtils.getMemberIdByJwtToken(request);
+    String memberId = getMemberIdByJwtToken(request);
     //查询数据库根据用户id获取用户信息
     UcenterMember member = memberService.getById(memberId);
     return Ret.ok().data("userInfo", member);
