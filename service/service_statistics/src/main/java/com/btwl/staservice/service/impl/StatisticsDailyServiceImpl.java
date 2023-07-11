@@ -39,10 +39,15 @@ public class StatisticsDailyServiceImpl extends
     baseMapper.delete(wrapper);
 
     //远程调用得到某一天注册人数
-    Ret registerRet = ucenterClient.countRegister(day);
+    Ret registerRet = ucenterClient.countRegister(day);//remote call
     Integer countRegister = (Integer) registerRet.getData().get("countRegister");
 
     //把获取数据添加数据库，统计分析表里面
+    StatisticsDaily sta = setStatis(day, countRegister);
+    baseMapper.insert(sta);
+  }
+
+  private static StatisticsDaily setStatis(String day, Integer countRegister) {
     StatisticsDaily sta = new StatisticsDaily();
     sta.setRegisterNum(countRegister); //注册人数
     sta.setDateCalculated(day);//统计日期
@@ -50,7 +55,7 @@ public class StatisticsDailyServiceImpl extends
     sta.setVideoViewNum(RandomUtils.nextInt(100, 200));
     sta.setLoginNum(RandomUtils.nextInt(100, 200));
     sta.setCourseNum(RandomUtils.nextInt(100, 200));
-    baseMapper.insert(sta);
+    return sta;
   }
 
   //图表显示，返回两部分数据，日期json数组，数量json数组
@@ -69,8 +74,7 @@ public class StatisticsDailyServiceImpl extends
     List<Integer> numDataList = new ArrayList<>();
 
     //遍历查询所有数据list集合，进行封装
-    for (int i = 0; i < staList.size(); i++) {
-      StatisticsDaily daily = staList.get(i);
+    for (StatisticsDaily daily : staList) {
       //封装日期list集合
       date_calculatedList.add(daily.getDateCalculated());
       //封装对应数量
