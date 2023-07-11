@@ -22,11 +22,16 @@ import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.springframework.stereotype.Component;
 
+/**
+ * 持续从MySQL读取新的插入新数据写传给前端通知
+ *
+ * todo  是增量更新的吗,而不是查询全部然后重复写入很多已经存在的
+ */
 @Component
 public class CanalClient {
 
   //sql队列
-  private Queue<String> SQL_QUEUE = new ConcurrentLinkedQueue<>();
+  private final Queue<String> SQL_QUEUE = new ConcurrentLinkedQueue<>();
 
   @Resource
   private DataSource dataSource;
@@ -53,7 +58,7 @@ public class CanalClient {
           if (batchId == -1 || size == 0) {
             Thread.sleep(1000);
           } else {
-            dataHandle(message.getEntries());
+            handleData(message.getEntries());
           }
           connector.ack(batchId);
 
@@ -62,9 +67,7 @@ public class CanalClient {
             executeQueueSql();
           }
         }
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      } catch (InvalidProtocolBufferException e) {
+      } catch (InterruptedException | InvalidProtocolBufferException e) {
         e.printStackTrace();
       }
     } finally {
@@ -81,131 +84,15 @@ public class CanalClient {
       String sql = SQL_QUEUE.poll();
       System.out.println("[sql]----> " + sql);
 
-      this.execute(sql.toString());
+      assert sql != null;
+      this.execute(sql);
     }
   }
 
-  /**
-   * 数据处理
-   *
-   * @param entrys
-   */
-  private void dataHandle(List<Entry> entrys) throws InvalidProtocolBufferException {
-    for (Entry entry : entrys) {
-      if (EntryType.ROWDATA == entry.getEntryType()) {
-        RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
-        EventType eventType = rowChange.getEventType();
-        if (eventType == EventType.DELETE) {
-          saveDeleteSql(entry);
-        } else if (eventType == EventType.UPDATE) {
-          saveUpdateSql(entry);
-        } else if (eventType == EventType.INSERT) {
-          saveInsertSql(entry);
-        }
-      }
-    }
-  }
-
-  /**
-   * 保存更新语句
-   *
-   * @param entry
-   */
-  private void saveUpdateSql(Entry entry) {
-    try {
-      RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
-      List<RowData> rowDatasList = rowChange.getRowDatasList();
-      for (RowData rowData : rowDatasList) {
-        List<Column> newColumnList = rowData.getAfterColumnsList();
-        StringBuffer sql = new StringBuffer("update " + entry.getHeader().getTableName() + " set ");
-        for (int i = 0; i < newColumnList.size(); i++) {
-          sql.append(" " + newColumnList.get(i).getName()
-              + " = '" + newColumnList.get(i).getValue() + "'");
-          if (i != newColumnList.size() - 1) {
-            sql.append(",");
-          }
-        }
-        sql.append(" where ");
-        List<Column> oldColumnList = rowData.getBeforeColumnsList();
-        for (Column column : oldColumnList) {
-          if (column.getIsKey()) {
-            //暂时只支持单一主键
-            sql.append(column.getName() + "=" + column.getValue());
-            break;
-          }
-        }
-        SQL_QUEUE.add(sql.toString());
-      }
-    } catch (InvalidProtocolBufferException e) {
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * 保存删除语句
-   *
-   * @param entry
-   */
-  private void saveDeleteSql(Entry entry) {
-    try {
-      RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
-      List<RowData> rowDatasList = rowChange.getRowDatasList();
-      for (RowData rowData : rowDatasList) {
-        List<Column> columnList = rowData.getBeforeColumnsList();
-        StringBuffer sql = new StringBuffer(
-            "delete from " + entry.getHeader().getTableName() + " where ");
-        for (Column column : columnList) {
-          if (column.getIsKey()) {
-            //暂时只支持单一主键
-            sql.append(column.getName() + "=" + column.getValue());
-            break;
-          }
-        }
-        SQL_QUEUE.add(sql.toString());
-      }
-    } catch (InvalidProtocolBufferException e) {
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * 保存插入语句
-   *
-   * @param entry
-   */
-  private void saveInsertSql(Entry entry) {
-    try {
-      RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
-      List<RowData> rowDatasList = rowChange.getRowDatasList();
-      for (RowData rowData : rowDatasList) {
-        List<Column> columnList = rowData.getAfterColumnsList();
-        StringBuffer sql = new StringBuffer(
-            "insert into " + entry.getHeader().getTableName() + " (");
-        for (int i = 0; i < columnList.size(); i++) {
-          sql.append(columnList.get(i).getName());
-          if (i != columnList.size() - 1) {
-            sql.append(",");
-          }
-        }
-        sql.append(") VALUES (");
-        for (int i = 0; i < columnList.size(); i++) {
-          sql.append("'" + columnList.get(i).getValue() + "'");
-          if (i != columnList.size() - 1) {
-            sql.append(",");
-          }
-        }
-        sql.append(")");
-        SQL_QUEUE.add(sql.toString());
-      }
-    } catch (InvalidProtocolBufferException e) {
-      e.printStackTrace();
-    }
-  }
 
   /**
    * 入库
    *
-   * @param sql
    */
   public void execute(String sql) {
     Connection con = null;
@@ -223,4 +110,122 @@ public class CanalClient {
       DbUtils.closeQuietly(con);
     }
   }
+
+  /**
+   * 数据处理
+   *
+
+   */
+  private void handleData(List<Entry> entries) throws InvalidProtocolBufferException {
+    for (Entry entry : entries) {
+      if (EntryType.ROWDATA == entry.getEntryType()) {
+        RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
+        EventType eventType = rowChange.getEventType();
+        if (eventType == EventType.DELETE) {
+          saveDeleteSql(entry);
+        } else if (eventType == EventType.UPDATE) {
+          saveUpdateSql(entry);
+        } else if (eventType == EventType.INSERT) {
+          saveInsertSql(entry);
+        }
+      }
+    }
+  }
+
+  /**
+   * 保存更新语句
+   *
+
+   */
+  private void saveUpdateSql(Entry entry) {
+    try {
+      RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
+      List<RowData> rowDataList = rowChange.getRowDatasList();
+      for (RowData rowData : rowDataList) {
+        List<Column> newColumnList = rowData.getAfterColumnsList();
+        StringBuilder sql = new StringBuilder("update " + entry.getHeader().getTableName() + " set ");
+        for (int i = 0; i < newColumnList.size(); i++) {
+          sql.append(" ").append(newColumnList.get(i).getName()).append(" = '")
+              .append(newColumnList.get(i).getValue()).append("'");
+          if (i != newColumnList.size() - 1) {
+            sql.append(",");
+          }
+        }
+        sql.append(" where ");
+        List<Column> oldColumnList = rowData.getBeforeColumnsList();
+        for (Column column : oldColumnList) {
+          if (column.getIsKey()) {
+            //暂时只支持单一主键
+            sql.append(column.getName()).append("=").append(column.getValue());
+            break;
+          }
+        }
+        SQL_QUEUE.add(sql.toString());
+      }
+    } catch (InvalidProtocolBufferException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * 保存删除语句
+   *
+
+   */
+  private void saveDeleteSql(Entry entry) {
+    try {
+      RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
+      List<RowData> rowDataList = rowChange.getRowDatasList();
+      for (RowData rowData : rowDataList) {
+        List<Column> columnList = rowData.getBeforeColumnsList();
+        StringBuilder sql = new StringBuilder(
+            "delete from " + entry.getHeader().getTableName() + " where ");
+        for (Column column : columnList) {
+          if (column.getIsKey()) {
+            //暂时只支持单一主键
+            sql.append(column.getName()).append("=").append(column.getValue());
+            break;
+          }
+        }
+        SQL_QUEUE.add(sql.toString());
+      }
+    } catch (InvalidProtocolBufferException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * 保存插入语句
+   *
+
+   */
+  private void saveInsertSql(Entry entry) {
+    try {
+      RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
+      List<RowData> rowDatasList = rowChange.getRowDatasList();
+      for (RowData rowData : rowDatasList) {
+        List<Column> columnList = rowData.getAfterColumnsList();
+        StringBuilder sql = new StringBuilder(
+            "insert into " + entry.getHeader().getTableName() + " (");
+        for (int i = 0; i < columnList.size(); i++) {
+          sql.append(columnList.get(i).getName());
+          if (i != columnList.size() - 1) {
+            sql.append(",");
+          }
+        }
+        sql.append(") VALUES (");
+        for (int i = 0; i < columnList.size(); i++) {
+          sql.append("'").append(columnList.get(i).getValue()).append("'");
+          if (i != columnList.size() - 1) {
+            sql.append(",");
+          }
+        }
+        sql.append(")");
+        SQL_QUEUE.add(sql.toString());
+      }
+    } catch (InvalidProtocolBufferException e) {
+      e.printStackTrace();
+    }
+  }
+
 }
