@@ -16,6 +16,11 @@
       <artifactId>aliyun-java-sdk-vod</artifactId>
       <groupId>com.aliyun</groupId>
     </dependency>
+    <dependency>
+      <artifactId>aliyun-java-vod-upload</artifactId>
+      <groupId>com.aliyun</groupId>
+      <version>1.4.15</version>
+    </dependency>
     <!--    <dependency>-->
     <!--      <artifactId>aliyun-sdk-vod-upload</artifactId>-->
     <!--      <groupId>com.aliyun</groupId>-->

@@ -124,9 +124,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     wrapper.orderByDesc("id");
     List<Permission> permissionList = baseMapper.selectList(wrapper);
 
-    List<Permission> result = bulid(permissionList);
-
-    return result;
+    return bulid(permissionList);
   }
 
   //根据角色获取菜单

@@ -21,8 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
  * @author testjava
  * @since 2020-02-29
  */
-@RestController
-@RequestMapping("/eduservice/subject")
+  @RestController
+  @RequestMapping("/eduservice/subject")
 @CrossOrigin
 public class EduSubjectController {
 

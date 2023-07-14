@@ -141,29 +141,33 @@ public class CanalClient {
     try {
       RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
       List<RowData> rowDataList = rowChange.getRowDatasList();
-      for (RowData rowData : rowDataList) {
-        List<Column> newColumnList = rowData.getAfterColumnsList();
-        StringBuilder sql = new StringBuilder("update " + entry.getHeader().getTableName() + " set ");
-        for (int i = 0; i < newColumnList.size(); i++) {
-          sql.append(" ").append(newColumnList.get(i).getName()).append(" = '")
-              .append(newColumnList.get(i).getValue()).append("'");
-          if (i != newColumnList.size() - 1) {
-            sql.append(",");
-          }
-        }
-        sql.append(" where ");
-        List<Column> oldColumnList = rowData.getBeforeColumnsList();
-        for (Column column : oldColumnList) {
-          if (column.getIsKey()) {
-            //暂时只支持单一主键
-            sql.append(column.getName()).append("=").append(column.getValue());
-            break;
-          }
-        }
-        SQL_QUEUE.add(sql.toString());
-      }
+      sqlPrep(entry, rowDataList);
     } catch (InvalidProtocolBufferException e) {
       e.printStackTrace();
+    }
+  }
+
+  private void sqlPrep(Entry entry, List<RowData> rowDataList) {
+    for (RowData rowData : rowDataList) {
+      List<Column> newColumnList = rowData.getAfterColumnsList();
+      StringBuilder sql = new StringBuilder("update " + entry.getHeader().getTableName() + " set ");
+      for (int i = 0; i < newColumnList.size(); i++) {
+        sql.append(" ").append(newColumnList.get(i).getName()).append(" = '")
+            .append(newColumnList.get(i).getValue()).append("'");
+        if (i != newColumnList.size() - 1) {
+          sql.append(",");
+        }
+      }
+      sql.append(" where ");
+      List<Column> oldColumnList = rowData.getBeforeColumnsList();
+      for (Column column : oldColumnList) {
+        if (column.getIsKey()) {
+          //暂时只支持单一主键
+          sql.append(column.getName()).append("=").append(column.getValue());
+          break;
+        }
+      }
+      SQL_QUEUE.add(sql.toString());
     }
   }
 
@@ -176,21 +180,25 @@ public class CanalClient {
     try {
       RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
       List<RowData> rowDataList = rowChange.getRowDatasList();
-      for (RowData rowData : rowDataList) {
-        List<Column> columnList = rowData.getBeforeColumnsList();
-        StringBuilder sql = new StringBuilder(
-            "delete from " + entry.getHeader().getTableName() + " where ");
-        for (Column column : columnList) {
-          if (column.getIsKey()) {
-            //暂时只支持单一主键
-            sql.append(column.getName()).append("=").append(column.getValue());
-            break;
-          }
-        }
-        SQL_QUEUE.add(sql.toString());
-      }
+      deletePrep(entry, rowDataList);
     } catch (InvalidProtocolBufferException e) {
       e.printStackTrace();
+    }
+  }
+
+  private void deletePrep(Entry entry, List<RowData> rowDataList) {
+    for (RowData rowData : rowDataList) {
+      List<Column> columnList = rowData.getBeforeColumnsList();
+      StringBuilder sql = new StringBuilder(
+          "delete from " + entry.getHeader().getTableName() + " where ");
+      for (Column column : columnList) {
+        if (column.getIsKey()) {
+          //暂时只支持单一主键
+          sql.append(column.getName()).append("=").append(column.getValue());
+          break;
+        }
+      }
+      SQL_QUEUE.add(sql.toString());
     }
   }
 
